@@ -1,6 +1,6 @@
-package main
+package server
 
-var banner = `<!DOCTYPE html>
+var decoyBanner = `<!DOCTYPE html>
 <html>
 <head>
 <title>Welcome to nginx!</title>

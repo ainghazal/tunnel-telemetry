@@ -1,11 +1,11 @@
-# tt-collector
+# Tunnel Telemetry
 
-A PoC implementation for a Tunnel Telemetry collector.
+A PoC implementation for a Tunnel Telemetry collector and client.
 
 ## Build Server
 
 ```
-go get github.com/ainghazal/tt-collector/cmd/server
+go get github.com/ainghazal/tunnel-telemetry/cmd/server
 ```
 
 

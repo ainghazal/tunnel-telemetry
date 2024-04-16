@@ -3,7 +3,7 @@ package collector
 import (
 	"log"
 
-	"github.com/ainghazal/tt-collector/internal/model"
+	"github.com/ainghazal/tunnel-telemetry/internal/model"
 	"github.com/ooni/probe-engine/pkg/geoipx"
 )
 
