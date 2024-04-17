@@ -1,8 +1,6 @@
 package collector
 
 import (
-	"log"
-
 	"github.com/ainghazal/tunnel-telemetry/internal/model"
 	"github.com/ooni/probe-engine/pkg/geoipx"
 )
@@ -25,8 +23,6 @@ func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error
 		return nil
 	}
 
-	log.Println("DEBUG: ip", ip)
-
 	asnLookup := mmdbLookupper{}
 	if asn, _, err := asnLookup.LookupASN(ip); err == nil {
 		m.ClientASN = asn
@@ -41,6 +37,10 @@ func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error
 	}
 
 	if endpoint.Host != "" {
+
+		m.EndpointAddr = endpoint.Host
+		m.EndpointPort = int(endpoint.Port)
+
 		if asn, _, err := asnLookup.LookupASN(endpoint.Host); err == nil {
 			m.EndpointASN = asn
 		}

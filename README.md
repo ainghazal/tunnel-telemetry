@@ -1,13 +1,12 @@
-# Tunnel Telemetry
+# Open Tunnel Telemetry
 
-A PoC implementation for a Tunnel Telemetry collector and client.
+A PoC implementation for a Open Tunnel Telemetry collector and client. See the [spec].
 
 ## Build Server
 
 ```
-go get github.com/ainghazal/tunnel-telemetry/cmd/server
+go get github.com/ainghazal/tunnel-telemetry/cmd/tt-server
 ```
-
 
 ## Geolocation
 

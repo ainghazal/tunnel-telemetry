@@ -41,7 +41,7 @@ type Measurement struct {
 	Config       any        `json:"config,omitempty"`
 	ClientASN    uint       `json:"client_asn"`
 	ClientCC     string     `json:"client_cc"`
-	Failure      *Failure   `json:"failure"`
+	Failure      *Failure   `json:"failure,omitempty"`
 	SamplingRate float32    `json:"sampling_rate"`
 }
 
