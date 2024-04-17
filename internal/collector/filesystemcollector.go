@@ -1,20 +1,20 @@
 package collector
 
 import (
+	"github.com/ainghazal/tunnel-telemetry/internal/config"
 	"github.com/ainghazal/tunnel-telemetry/internal/model"
 	"github.com/ooni/probe-engine/pkg/geoipx"
 )
 
-//
 // FileSystemCollector is a simplistic implementation of a collector
 // that stores reports in the filesystem.
-//
+type FileSystemCollector struct {
+	config *config.Config
+}
 
-type FileSystemCollector struct{}
-
-// TODO: this is done by binding, not needed.
-func (fsc *FileSystemCollector) Parse(s string) (*model.Measurement, error) {
-	return &model.Measurement{}, nil
+// NewFileSystemCollector creates a new filesystem collector.
+func NewFileSystemCollector(cfg *config.Config) *FileSystemCollector {
+	return &FileSystemCollector{config: cfg}
 }
 
 func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error {
@@ -36,11 +36,16 @@ func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error
 		return err
 	}
 
+	m.Protocol = endpoint.Proto
+
 	if endpoint.Host != "" {
 
-		m.EndpointAddr = endpoint.Host
 		m.EndpointPort = int(endpoint.Port)
 
+		if fsc.config.AllowPublicEndpoint {
+			// we only want to expose the endpoint address if explicitely configured to do so.
+			m.EndpointAddr = endpoint.Host
+		}
 		if asn, _, err := asnLookup.LookupASN(endpoint.Host); err == nil {
 			m.EndpointASN = asn
 		}
@@ -52,12 +57,14 @@ func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error
 	return nil
 }
 
+// Save implements [model.Collector]
 func (fsc *FileSystemCollector) Save(m *model.Measurement) bool {
-	return false
+	err := m.PreSave(fsc.config)
+	return err == nil
 }
 
-// FileSystemCollector implements model.Collector
-var _ model.Collector = &FileSystemCollector{}
+// FileSystemCollector implements [model.GeolocatingCollector]
+var _ model.GeolocatingCollector = &FileSystemCollector{}
 
 type mmdbLookupper struct{}
 

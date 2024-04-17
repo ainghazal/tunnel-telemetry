@@ -8,18 +8,19 @@ import (
 	"time"
 
 	"github.com/ainghazal/tunnel-telemetry/internal/collector"
+	"github.com/ainghazal/tunnel-telemetry/internal/config"
 	"github.com/ainghazal/tunnel-telemetry/internal/server"
 )
 
 func main() {
 	// TODO(ain): pass config (viper)
-	cfg := &server.Config{
+	cfg := &config.Config{
 		DebugGeolocation: true,
 	}
 
 	e := server.NewEchoServer(cfg)
 
-	collector := &collector.FileSystemCollector{}
+	collector := collector.NewFileSystemCollector(cfg)
 	h := server.NewHandler(collector)
 
 	e.GET("/", server.HandleRootDecoy)

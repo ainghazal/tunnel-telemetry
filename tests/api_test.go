@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ainghazal/tunnel-telemetry/internal/collector"
+	"github.com/ainghazal/tunnel-telemetry/internal/config"
 	"github.com/ainghazal/tunnel-telemetry/internal/model"
 	"github.com/ainghazal/tunnel-telemetry/internal/server"
 	"github.com/google/uuid"
@@ -29,9 +30,12 @@ type mockRequest struct {
 
 // testFileSystemCollectorWithPayload is an utility function to test handlers exercised by the FileSystemCollector
 // implementation.
-func testFileSystemCollectorWithPayload(endp, payload string, mr *mockRequest) (echo.Context, *server.Handler, *httptest.ResponseRecorder) {
-	cfg := server.NewConfig()
+func testFileSystemCollectorWithPayload(endp, payload string, cfg *config.Config, mr *mockRequest) (echo.Context, *server.Handler, *httptest.ResponseRecorder) {
+	if cfg == nil {
+		cfg = config.NewConfig()
+	}
 	cfg.DebugGeolocation = true
+
 	e := server.NewEchoServer(cfg)
 
 	req := httptest.NewRequest(http.MethodPost, endp, strings.NewReader(payload))
@@ -41,7 +45,7 @@ func testFileSystemCollectorWithPayload(endp, payload string, mr *mockRequest) (
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.SetPath("/report")
-	h := server.NewHandler(&collector.FileSystemCollector{})
+	h := server.NewHandler(collector.NewFileSystemCollector(cfg))
 	return ctx, h, rec
 }
 
@@ -63,7 +67,7 @@ func isValidUUID(s string) bool {
 }
 
 func TestRootDecoy(t *testing.T) {
-	e := server.NewEchoServer(server.NewConfig())
+	e := server.NewEchoServer(config.NewConfig())
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
@@ -115,6 +119,7 @@ func TestMinimalHappyReport(t *testing.T) {
 	ctx, hdlr, rec := testFileSystemCollectorWithPayload(
 		"/report",
 		report,
+		nil,
 		&mockRequest{},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {
@@ -124,8 +129,43 @@ func TestMinimalHappyReport(t *testing.T) {
 				t.Fatal(err)
 			}
 			assert.True(t, isValidUUID(m.UUID))
-			assert.Equal(t, "1.1.1.1", m.EndpointAddr)
+			assert.Equal(t, "ss", m.Protocol)
 			assert.Equal(t, 443, m.EndpointPort)
+			// by default, we scrub the endpoint field, so we don't expect
+			// the endpoint address to be public either.
+			assert.Equal(t, "", m.EndpointAddr)
+			assert.Equal(t, "", m.Endpoint)
+		}
+	}
+}
+
+func TestMinimalHappyReportWithPublicEndpointSetting(t *testing.T) {
+	report := makeReport(&reportData{
+		Type:      "tunnel-telemetry",
+		Timestamp: makeTimestampForYesterday(),
+		Endpoint:  "ss://1.1.1.1:443",
+	})
+
+	ctx, hdlr, rec := testFileSystemCollectorWithPayload(
+		"/report",
+		report,
+		&config.Config{
+			AllowPublicEndpoint: true,
+		},
+		&mockRequest{},
+	)
+	if assert.NoError(t, hdlr.CreateReport(ctx)) {
+		if assert.Equal(t, http.StatusCreated, rec.Code) {
+			m, err := parseMeasurementResponse(rec.Body.Bytes())
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.True(t, isValidUUID(m.UUID))
+			assert.Equal(t, "ss", m.Protocol)
+			assert.Equal(t, 443, m.EndpointPort)
+			// in this test we do allow public endpoint collection, so this collector
+			// should not scrub the endpoint IP address / hostname.
+			assert.Equal(t, "1.1.1.1", m.EndpointAddr)
 			assert.Equal(t, "ss://1.1.1.1:443", m.Endpoint)
 		}
 	}
@@ -143,6 +183,7 @@ func TestReportWithFailure(t *testing.T) {
 	ctx, hdlr, rec := testFileSystemCollectorWithPayload(
 		"/report",
 		report,
+		nil,
 		&mockRequest{},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {
@@ -164,6 +205,7 @@ func TestUnknownReportTypeFails(t *testing.T) {
 			Timestamp: makeTimestampForYesterday(),
 			Endpoint:  "ss://1.1.1.1:443",
 		}),
+		nil,
 		&mockRequest{},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {
@@ -179,6 +221,7 @@ func TestReportFailsWithNoTimestamp(t *testing.T) {
 			Timestamp: "",
 			Endpoint:  "ss://1.1.1.1:443",
 		}),
+		nil,
 		&mockRequest{},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {
@@ -194,6 +237,7 @@ func TestReportFailsWithTimestampTooOld(t *testing.T) {
 			Timestamp: makeTimestampForOneMonthAgo(),
 			Endpoint:  "ss://1.1.1.1:443",
 		}),
+		nil,
 		&mockRequest{},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {
@@ -209,6 +253,7 @@ func TestReportFailsWithTimestampInTheFuture(t *testing.T) {
 			Timestamp: makeTimestampForTomorrow(),
 			Endpoint:  "ss://1.1.1.1:443",
 		}),
+		nil,
 		&mockRequest{},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {
@@ -224,6 +269,7 @@ func TestClientGeolocationWithSpoofedHeader(t *testing.T) {
 			Timestamp: makeTimestampForYesterday(),
 			Endpoint:  "ss://1.1.1.1:443",
 		}),
+		nil,
 		&mockRequest{realIP: "2.3.4.5"},
 	)
 	if assert.NoError(t, hdlr.CreateReport(ctx)) {

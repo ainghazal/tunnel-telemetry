@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ainghazal/tunnel-telemetry/internal/config"
+
 	"github.com/google/uuid"
 )
 
@@ -31,6 +33,8 @@ type Measurement struct {
 	UUID         string     `json:"uuid,omitempty"`
 	OOID         string     `json:"ooni-measurement-id,omitempty"`
 	Time         *time.Time `json:"t"`
+	TimeReported *time.Time `json:"t_reported,omitempty"`
+	TimeRelayed  *time.Time `json:"t_relayed,omitempty"`
 	Agent        string     `json:"agent,omitempty"`
 	Endpoint     string     `json:"endpoint"`
 	EndpointAddr string     `json:"endpoint_addr,omitempty"`
@@ -91,10 +95,14 @@ func (m *Measurement) Validate() error {
 
 // PreSave updates any needed fields before saving in the database. It returns an error
 // if any of the optional fields are set to improper values.
-func (m *Measurement) PreSave() error {
+func (m *Measurement) PreSave(cfg *config.Config) error {
 	if m.UUID == "" {
+		// assign a UUID if the report did not have one.
 		m.UUID = uuid.New().String()
 	}
-	// TODO(ain): scrub endpoint IP if configured so.
+	if !cfg.AllowPublicEndpoint {
+		// scrub the endpoint IP Address.
+		m.Endpoint = ""
+	}
 	return nil
 }

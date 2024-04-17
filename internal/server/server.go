@@ -4,23 +4,11 @@ package server
 import (
 	"net/http"
 
+	"github.com/ainghazal/tunnel-telemetry/internal/config"
 	"github.com/ainghazal/tunnel-telemetry/internal/model"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
-
-// Config allows to customize the server's behavior.
-type Config struct {
-	// DebugGeolocation configures the insecure defaults for echo server,
-	// they allow to spoof the RealIP from the headers.
-	DebugGeolocation bool
-}
-
-func NewConfig() *Config {
-	return &Config{
-		DebugGeolocation: false,
-	}
-}
 
 // Response is the result returned by the server.
 type Response struct {
@@ -29,7 +17,7 @@ type Response struct {
 }
 
 // NewEchoServer returns a configured Echo server.
-func NewEchoServer(c *Config) *echo.Echo {
+func NewEchoServer(c *config.Config) *echo.Echo {
 	e := echo.New()
 	// We explicitely set IPExtractor to the direct IP Extractor.
 	// I will need to add the override ability in the case someone needs
@@ -45,10 +33,10 @@ func NewEchoServer(c *Config) *echo.Echo {
 
 // Handler holds methods to handle the different server endpoints.
 type Handler struct {
-	Collector model.Collector
+	Collector model.GeolocatingCollector
 }
 
-func NewHandler(c model.Collector) *Handler {
+func NewHandler(c model.GeolocatingCollector) *Handler {
 	return &Handler{
 		Collector: c,
 	}
@@ -65,8 +53,7 @@ func (h *Handler) CreateReport(ctx echo.Context) error {
 		r := &Response{OK: false, Message: err.Error()}
 		return ctx.JSON(http.StatusBadRequest, r)
 	}
-	// TODO: collector.Save(m) -> should call m.PreSave()
-	m.PreSave()
+	h.Collector.Save(m)
 	return ctx.JSONPretty(http.StatusCreated, m, "  ")
 }
 
