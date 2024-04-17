@@ -3,6 +3,7 @@ package collector
 import (
 	"github.com/ainghazal/tunnel-telemetry/internal/config"
 	"github.com/ainghazal/tunnel-telemetry/internal/model"
+	"github.com/ainghazal/tunnel-telemetry/internal/oonirelay"
 	"github.com/ooni/probe-engine/pkg/geoipx"
 )
 
@@ -60,6 +61,11 @@ func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error
 // Save implements [model.Collector]
 func (fsc *FileSystemCollector) Save(m *model.Measurement) bool {
 	err := m.PreSave(fsc.config)
+	return err == nil
+}
+
+func (fsc *FileSystemCollector) Submit(mm []*model.Measurement) bool {
+	err := oonirelay.SubmitMeasurement(mm[0])
 	return err == nil
 }
 

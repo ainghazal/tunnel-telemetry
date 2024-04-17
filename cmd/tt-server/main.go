@@ -21,7 +21,7 @@ func main() {
 	e := server.NewEchoServer(cfg)
 
 	collector := collector.NewFileSystemCollector(cfg)
-	h := server.NewHandler(collector)
+	h := server.NewHandler(collector, collector)
 
 	e.GET("/", server.HandleRootDecoy)
 	e.POST("/report", h.CreateReport)

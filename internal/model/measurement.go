@@ -32,11 +32,12 @@ type Measurement struct {
 	Type         string     `json:"report-type"`
 	UUID         string     `json:"uuid,omitempty"`
 	OOID         string     `json:"ooni-measurement-id,omitempty"`
+	OOIDLink     string     `json:"ooni-measurement-link,omitempty"`
 	Time         *time.Time `json:"t"`
 	TimeReported *time.Time `json:"t_reported,omitempty"`
 	TimeRelayed  *time.Time `json:"t_relayed,omitempty"`
 	Agent        string     `json:"agent,omitempty"`
-	Endpoint     string     `json:"endpoint"`
+	Endpoint     string     `json:"endpoint,omitempty"`
 	EndpointAddr string     `json:"endpoint_addr,omitempty"`
 	EndpointPort int        `json:"endpoint_port,omitempty"`
 	EndpointASN  uint       `json:"endpoint_asn,omitempty"`
@@ -65,7 +66,7 @@ func NewMeasurement() *Measurement {
 		ClientASN:    0,
 		ClientCC:     "",
 		Failure:      nil,
-		SamplingRate: 1,
+		SamplingRate: 1.0,
 	}
 }
 

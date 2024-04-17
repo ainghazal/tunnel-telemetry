@@ -34,11 +34,13 @@ func NewEchoServer(c *config.Config) *echo.Echo {
 // Handler holds methods to handle the different server endpoints.
 type Handler struct {
 	Collector model.GeolocatingCollector
+	Submitter model.Submitter
 }
 
-func NewHandler(c model.GeolocatingCollector) *Handler {
+func NewHandler(c model.GeolocatingCollector, s model.Submitter) *Handler {
 	return &Handler{
 		Collector: c,
+		Submitter: s,
 	}
 }
 
@@ -54,6 +56,9 @@ func (h *Handler) CreateReport(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, r)
 	}
 	h.Collector.Save(m)
+	// TODO(ain): we can configure the colector to either relay every measurement
+	// or submit daily/hourly aggregates only. This is the direct thing.
+	h.Submitter.Submit([]*model.Measurement{m})
 	return ctx.JSONPretty(http.StatusCreated, m, "  ")
 }
 

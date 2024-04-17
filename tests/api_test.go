@@ -30,7 +30,10 @@ type mockRequest struct {
 
 // testFileSystemCollectorWithPayload is an utility function to test handlers exercised by the FileSystemCollector
 // implementation.
-func testFileSystemCollectorWithPayload(endp, payload string, cfg *config.Config, mr *mockRequest) (echo.Context, *server.Handler, *httptest.ResponseRecorder) {
+func testFileSystemCollectorWithPayload(
+	endp, payload string,
+	cfg *config.Config,
+	mr *mockRequest) (echo.Context, *server.Handler, *httptest.ResponseRecorder) {
 	if cfg == nil {
 		cfg = config.NewConfig()
 	}
@@ -45,7 +48,8 @@ func testFileSystemCollectorWithPayload(endp, payload string, cfg *config.Config
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.SetPath("/report")
-	h := server.NewHandler(collector.NewFileSystemCollector(cfg))
+	col := collector.NewFileSystemCollector(cfg)
+	h := server.NewHandler(col, col)
 	return ctx, h, rec
 }
 
