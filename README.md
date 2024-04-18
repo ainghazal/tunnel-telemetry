@@ -7,7 +7,7 @@ A PoC implementation for a Open Tunnel Telemetry collector and client. See the [
 This project requires `go1.21` or higher.
 
 ```
-go download github.com/ainghazal/tunnel-telemetry/cmd/tt-server
+go install github.com/ainghazal/tunnel-telemetry/cmd/tt-server@latest
 ```
 
 ## Concepts
@@ -25,8 +25,10 @@ go download github.com/ainghazal/tunnel-telemetry/cmd/tt-server
 ## Running
 
 ```
-./tt-server
+tt-server
 ```
+
+This will run server in port `:8080`.
 
 ## Sending a report
 
