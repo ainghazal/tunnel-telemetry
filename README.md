@@ -12,7 +12,7 @@ go install github.com/ainghazal/tunnel-telemetry/cmd/tt-server@latest
 
 ## Concepts
 
-* **Client**: is an application client that generates connectivity reports; and sends them to its configured collector.
+* **Client**: is an application client that generates connectivity reports; and sends them to its configured collector(s).
 * **Endpoint**: the circumvention proxy that the client attempts to connect to.
 * **Collector**: a HTTPS endpoint that can receive client reports. Trust is important, because the collector sees the client IPs, and it knows the endpoint IPs.
 * **Scrubbing**: the collector can be configured to scrub potentially sensitive information (client and endpoint IPs).
@@ -84,9 +84,10 @@ where we can share the report in the public OONI Explorer.
 ## Geolocation
 
 For simplicity, it's assumed that the collector is not blocked, and that
-clients report to the collector using their public IP.  Obviously, this point
-will need to be reconsidered, because from a privacy perspective it does not
-make sense to abandon the tunnel to submit a report.
+clients report to the collector using their public IP.  It's likely that we'll have 
+to reconsider this point, because from a privacy perspective perhaps it does not
+make much sense to abandon the tunnel to submit a report. This probably will lead us 
+to separate discovery of IP and geolocation itself.
 
 For the time being, geolocation in the `tunnel-telemetry` server only works when listening directly on a port exposed to the internet.
 
