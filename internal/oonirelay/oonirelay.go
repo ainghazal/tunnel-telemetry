@@ -158,8 +158,8 @@ func (rs *ReportSubmitter) Close() error {
 	return nil
 }
 
+// SubmitMeasurement takes a [model.Measurement] and submits a report to OONI.
 func SubmitMeasurement(mm *model.Measurement) error {
-
 	rs := NewReportSubmitter()
 	rr := NewReportRequest()
 	rr.TestStartTime = time.Now().UTC().Format(timeFormat)
