@@ -12,11 +12,11 @@ go download github.com/ainghazal/tunnel-telemetry/cmd/tt-server
 
 ## Concepts
 
-* Client: is an application client that generates connectivity reports; and sends them to its configured collector.
-* Endpoint: the circumvention proxy that the client attempts to connect to.
-* Collector: an endpoint that can receive client reports. Trust is important, because the collector sees the client IPs, and it knows the endpoint IPs.
-* Scrubbing: the collector can be configured to scrub potentially sensitive information (client and endpoint IPs).
-* Relay: after scrubbing, the collector can relay reports to a secondary
+* **Client**: is an application client that generates connectivity reports; and sends them to its configured collector.
+* **Endpoint**: the circumvention proxy that the client attempts to connect to.
+* **Collector**: a HTTPS endpoint that can receive client reports. Trust is important, because the collector sees the client IPs, and it knows the endpoint IPs.
+* **Scrubbing**: the collector can be configured to scrub potentially sensitive information (client and endpoint IPs).
+* **Relay**: after scrubbing, the collector can relay reports to a secondary
   collector. The secondary collector receives individual reports (or
   aggregates) by the primary collector, and is able to run data processing
   pipelines with a broader context than individual collectors. In this case,
@@ -73,6 +73,10 @@ Upon a successful processing, and possibly relaying the report, the collector re
   "sampling_rate": 1
 }
 ```
+
+In this case, the collector was configured to relay reports to the OONI
+upstream collector, and it's adding an [OONI Measurement Link](https://explorer.ooni.org/m/20240418123955.791083_IT_tunneltelemetry_67c3f38268f4d364)
+where we can share the report in the public OONI Explorer.
 
 
 ## Geolocation
