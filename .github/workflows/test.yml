@@ -19,7 +19,7 @@ jobs:
     - name: setup go
       uses: actions/setup-go@v5
       with:
-        go-version: '$GOVERSION'
+        go-version: '$env.GOVERSION'
     - name: Run short tests
       run: go test -cover ./...
 
