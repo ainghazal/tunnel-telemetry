@@ -2,29 +2,26 @@
 
 A PoC implementation for a Open Tunnel Telemetry collector and client. See the [spec].
 
-## Build Server
+## Concepts
 
-This project requires `go1.21` or higher.
+* **Client**: is an application client that generates connectivity reports; and sends them to its configured collector(s). Equivalent to the **probe** in OONI terminology.
+* **Endpoint**: the circumvention proxy that the client attempts to connect to.
+* **Collector**: a HTTPS endpoint that can receive client reports. Trust is important, because the collector sees the client IPs, and it knows the endpoint IPs. A client is instructed to send reports to one or more collectors (as backups).
+* **Scrubbing**: the collector can be configured to scrub potentially sensitive information (client and endpoint IPs).
+* **Relay**: after scrubbing, the collector can relay reports to a **secondary collector**. The secondary collector receives individual reports (or aggregates) by the primary collector, and is able to run data processing pipelines with a broader context than individual collectors. In the case of this implementation of `tunnel-telemetry` collector, OONI acts as a **secondary collector**.
 
-```
+## Server
+
+
+### Install
+
+```bash
 go install github.com/ainghazal/tunnel-telemetry/cmd/tt-server@latest
 ```
 
-## Concepts
+### Run
 
-* **Client**: is an application client that generates connectivity reports; and sends them to its configured collector(s).
-* **Endpoint**: the circumvention proxy that the client attempts to connect to.
-* **Collector**: a HTTPS endpoint that can receive client reports. Trust is important, because the collector sees the client IPs, and it knows the endpoint IPs.
-* **Scrubbing**: the collector can be configured to scrub potentially sensitive information (client and endpoint IPs).
-* **Relay**: after scrubbing, the collector can relay reports to a secondary
-  collector. The secondary collector receives individual reports (or
-  aggregates) by the primary collector, and is able to run data processing
-  pipelines with a broader context than individual collectors. In this case,
-  OONI acts as a secondary collector.
-
-## Running
-
-```
+```bash
 tt-server
 ```
 
@@ -32,16 +29,17 @@ This will run server in port `:8080`.
 
 ## Sending a report
 
-A minimal report is a json containing three mandatory fields:
+A minimal report is a json containing only three mandatory fields:
 
-* `report-type`: MUST be `tunnel-telemetry`.
-* `t`: MUST be the timestamp for the observation contained in the report (TODO: standardize if start or end time). The collector will not process reports sent from too far in the future or the past.
-* `endpoint`: MUST be the endpoint that the client attempted to connect to, in the format `protocol://ip_address:port`.
+* `report-type`: **MUST** be `tunnel-telemetry`.
+* `time`: **MUST** be the initial timestamp for the observation contained in the report. The collector will not process reports sent from too far in the future or the past.
+* `endpoint`: **MUST** be the endpoint that the client attempted to connect to, in the format `protocol://ip_address:port`.
 
 A few optional fields are also understood:
 
 * `config`: an arbitrary `map[str]str` containing relevant configurations used in the connection. Sensitive information should not be sent here.
-* `failure`: in the form `{"op": "operation.detail", "error": "error message"}`, or `null`. A missing `failure` field is understood as a successful connection.
+* `duration_ms(int)`: a duration, in  milliseconds. This is the delta between the initial time, `time`, and the success or failure indicated by the report.
+* `failure`: in the form `{"op": "operation.detail", "msg": "error message", "posix_error": "standard posix error"}`, or `null`. A missing `failure` field is understood as a successful connection.
 * `uuid`: the client can add an `uuid`. If empty, one will be generated.
 
 ```bash
@@ -89,6 +87,6 @@ to reconsider this point, because from a privacy perspective perhaps it does not
 make much sense to abandon the tunnel to submit a report. This probably will lead us 
 to separate discovery of IP and geolocation itself.
 
-For the time being, geolocation in the `tunnel-telemetry` server only works when listening directly on a port exposed to the internet.
+⚠️ For the time being, geolocation in the `tunnel-telemetry` server only works when listening directly on a port exposed to the internet.
 
 For working behind proxies, the right setting must be configured in the instantiation of the echo server (TBD).
