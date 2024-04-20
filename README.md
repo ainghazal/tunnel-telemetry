@@ -35,13 +35,6 @@ A minimal report is a json containing only three mandatory fields:
 * `time`: **MUST** be the initial timestamp for the observation contained in the report. The collector will not process reports sent from too far in the future or the past.
 * `endpoint`: **MUST** be the endpoint that the client attempted to connect to, in the format `protocol://ip_address:port`.
 
-A few optional fields are also understood:
-
-* `config`: an arbitrary `map[str]str` containing relevant configurations used in the connection. Sensitive information should not be sent here.
-* `duration_ms(int)`: a duration, in  milliseconds. This is the delta between the initial time, `time`, and the success or failure indicated by the report.
-* `failure`: in the form `{"op": "operation.detail", "msg": "error message", "posix_error": "standard posix error"}`, or `null`. A missing `failure` field is understood as a successful connection.
-* `uuid`: the client can add an `uuid`. If empty, one will be generated.
-
 ```bash
 curl -X POST \
     -H 'Content-Type: application/json' \
@@ -49,6 +42,16 @@ curl -X POST \
     -d '{"report-type": "tunnel-telemetry", "t": "2024-04-12T00:00:00Z", "endpoint": "ss://1.1.1.1:443", "config": {"prefix": "asdf"}}' \
     http://localhost:8080/report
 ```
+
+### Optional fields
+
+A few optional fields are also understood:
+
+* `config`: an arbitrary `map[str]str` containing relevant configurations used in the connection. Sensitive information should not be sent here.
+* `duration_ms(int)`: a duration, in  milliseconds. This is the delta between the initial time, `time`, and the success or failure indicated by the report.
+* `failure`: in the form `{"op": "operation.detail", "msg": "error message", "posix_error": "standard posix error"}`, or `null`. A missing `failure` field is understood as a successful connection.
+* `uuid`: the client can add an `uuid`. If empty, one will be generated.
+
 
 ## Viewing a report
 

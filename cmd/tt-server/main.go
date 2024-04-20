@@ -1,46 +1,11 @@
+/*
+Copyright © 2024 Ain Ghazal <ain@openobservatory.org>
+*/
+
 package main
 
-import (
-	"context"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
-
-	"github.com/ainghazal/tunnel-telemetry/internal/collector"
-	"github.com/ainghazal/tunnel-telemetry/internal/config"
-	"github.com/ainghazal/tunnel-telemetry/internal/server"
-)
+import "github.com/ainghazal/tunnel-telemetry/cmd/tt-server/internal/app"
 
 func main() {
-	// TODO(ain): pass config (viper)
-	cfg := &config.Config{
-		DebugGeolocation: true,
-	}
-
-	e := server.NewEchoServer(cfg)
-
-	collector := collector.NewFileSystemCollector(cfg)
-	h := server.NewHandler(collector, collector)
-
-	e.GET("/", server.HandleRootDecoy)
-	e.POST("/report", h.CreateReport)
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-
-	// Start server
-	go func() {
-		if err := e.Start(":8080"); err != nil && err != http.ErrServerClosed {
-			e.Logger.Fatalf("shutting down the server: %v", err)
-		}
-	}()
-
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
-	<-ctx.Done()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal(err)
-	}
+	app.Execute()
 }
