@@ -8,10 +8,6 @@ on:
     branches:
       - 'no-masters'
 
-permissions:
-    contents: write
-    packages: write
-
 jobs:
 
   lint:
@@ -48,8 +44,7 @@ jobs:
 
   build-linux-amd64:
     runs-on: ubuntu-latest
-    # TODO: enable dep tree!
-    # needs: [test, lint, gosec]
+    needs: [test, lint, gosec]
     steps:
     - uses: actions/checkout@v4
     - name: setup go
