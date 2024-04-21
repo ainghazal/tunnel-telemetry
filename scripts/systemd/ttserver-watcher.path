@@ -1,0 +1,7 @@
+[Path]
+Unit=ttserver-watcher.service
+PathChanged=/home/ttserver/dist/tt-server
+
+[Install]
+WantedBy=multi-user.target
+
