@@ -1,0 +1,66 @@
+name: cicd
+
+on:
+  push:
+    branches:
+      - 'no-masters'
+  pull_request:
+    branches:
+      - 'no-masters'
+
+permissions:
+    contents: write
+    packages: write
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Lint with revive action, from pre-built image
+      uses: docker://morphy/revive-action:v2
+      with:
+        path: "."
+
+  gosec:
+    runs-on: ubuntu-latest
+    env:
+        GO111MODULE: on
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v4
+    - name: Run Gosec security scanner
+      uses: securego/gosec@master
+      with:
+        args: '-no-fail ./...'
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: setup go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+    - name: Run short tests
+      run: go test -cover ./...
+
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    needs: [test, lint, gosec]
+    steps:
+    - uses: actions/checkout@v4
+    - name: setup go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+    - name: Install dependencies
+      run: go get ./...
+    - name: build linux-amd64
+      run: go build ./cmd/tt-server
+    - name: upload binary artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tt-server
+        path: tt-server
