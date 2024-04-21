@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"time"
 
 	"github.com/ainghazal/tunnel-telemetry/internal/collector"
@@ -16,6 +17,21 @@ import (
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 )
+
+var commitInfo = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				return setting.Value[:12]
+			}
+		}
+	}
+	return "unknown"
+}()
+
+func handleVersionInfo(c echo.Context) error {
+	return c.String(http.StatusOK, commitInfo)
+}
 
 func startEchoServer(cfg *config.Config) {
 	e := server.NewEchoServer(cfg)
@@ -28,6 +44,7 @@ func startEchoServer(cfg *config.Config) {
 
 	e.GET("/", server.HandleRootDecoy)
 	e.POST("/report", h.CreateReport)
+	e.GET("/version", handleVersionInfo)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

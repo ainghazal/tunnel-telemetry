@@ -11,10 +11,10 @@ Restart=on-failure
 RestartSec=10
 
 WorkingDirectory=/home/ttserver
-ExecStart=/usr/bin/ttserver
+ExecStart=/usr/bin/tt-server
 
 ExecStartPre=cp /home/ttserver/dist/tt-server /usr/bin
-ExecStartPre=chmod +x /usr/bin/ttserver
+ExecStartPre=chmod +x /usr/bin/tt-server
 
 [Install]
 WantedBy=multi-user.target
