@@ -117,25 +117,27 @@ Upon a successful processing, and possibly relaying the report, the collector re
 ```JavaScript
 {
   "report-type": "tunnel-telemetry",
-  "uuid": "2891c6ff-1b5d-4090-aff9-805d8c4a61c0",
-  "ooni-measurement-id": "20240418123955.791083_IT_tunneltelemetry_67c3f38268f4d364",
-  "ooni-measurement-link": "https://explorer.ooni.org/m/20240418123955.791083_IT_tunneltelemetry_67c3f38268f4d364",
-  "t": "2024-04-12T00:00:00Z",
+  "uuid": "fbf902ee-5d78-43cd-af39-b9b297a0d2f7",
+  "ooni-measurement-id": "20240422144155.458035_IT_tunneltelemetry_84954cf1a5baeb91",
+  "ooni-measurement-link": "https://explorer.ooni.org/m/20240422144155.458035_IT_tunneltelemetry_84954cf1a5baeb91",
+  "time": "2024-04-18T00:00:00Z",
+  "collector_id": "uenohphi7oqueiZohl2V",
   "endpoint_port": 443,
-  "endpoint_asn": 13335,
+  "endpoint_asn": "AS13335",
   "endpoint_cc": "AU",
   "proto": "ss",
   "config": {
-    "prefix": "asdf"
+    "prefix": "xx"
   },
-  "client_asn": 3215,
-  "client_cc": "FR",
+  "client_asn": "AS50304",
+  "client_cc": "NO",
   "sampling_rate": 1
 }
 ```
 
 In this case, the collector was configured to relay reports to the OONI
-upstream collector, and it's adding an [OONI Measurement Link](https://explorer.ooni.org/m/20240418123955.791083_IT_tunneltelemetry_67c3f38268f4d364)
+upstream collector, and it's adding an
+[OONI Measurement Link](https://explorer.ooni.org/m/20240422144155.458035_IT_tunneltelemetry_84954cf1a5baeb91)
 where we can share the report in the public OONI Explorer.
 
 
