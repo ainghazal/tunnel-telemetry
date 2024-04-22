@@ -67,8 +67,11 @@ func (fsc *FileSystemCollector) Save(m *model.Measurement) bool {
 }
 
 func (fsc *FileSystemCollector) Submit(mm []*model.Measurement) bool {
-	err := oonirelay.SubmitMeasurement(mm[0])
-	return err == nil
+	if fsc.config.RelayToOONI {
+		err := oonirelay.SubmitMeasurement(mm[0])
+		return err == nil
+	}
+	return false
 }
 
 // FileSystemCollector implements [model.GeolocatingCollector]

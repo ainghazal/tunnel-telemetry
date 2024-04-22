@@ -31,6 +31,7 @@ const (
 	flagDebugGeolocation
 	flagHostname
 	flagListenAddr
+	flagDisableOONIRelay
 )
 
 var allFlags = map[flag]string{
@@ -42,6 +43,7 @@ var allFlags = map[flag]string{
 	flagDebugGeolocation:    "debug-geolocation",
 	flagHostname:            "hostname",
 	flagListenAddr:          "listen",
+	flagDisableOONIRelay:    "no-ooni-relay",
 }
 
 func (f flag) String() string {
@@ -69,6 +71,7 @@ and optionally stores them and/or relays them to an upstream collector.`,
 			DebugGeolocation:    viper.GetBool(flagDebugGeolocation.String()),
 			Hostname:            viper.GetString(flagHostname.String()),
 			ListenAddr:          viper.GetString(flagListenAddr.String()),
+			RelayToOONI:         !viper.GetBool(flagDisableOONIRelay.String()),
 		}
 
 		if cfg.AutoTLS && cfg.Hostname == "" {
@@ -103,13 +106,14 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", defaultConfigFile, "config file")
 
 	rootCmd.Flags().BoolP(flagAllowPublicEndpoint.String(), "", false, "allow publishing of the endpoints IP")
-	rootCmd.Flags().BoolP(flagAutoTLS.String(), "", false, "use autotls to manage LetsEncrypt Certificates (default: false)")
+	rootCmd.Flags().BoolP(flagAutoTLS.String(), "", false, "use autotls to manage LetsEncrypt Certificates")
 	rootCmd.Flags().StringP(flagAutoTLSCacheDir.String(), "", defaultCacheDir, "dir to cache autotls material")
 	rootCmd.Flags().StringP(flagCollectorID.String(), "", "", "collector ID to add to enrich reports with")
 	rootCmd.Flags().BoolP(flagDebug.String(), "d", false, "set debug level in logs")
 	rootCmd.Flags().BoolP(flagDebugGeolocation.String(), "", false, "get real IP from headers (potentially insecure!)")
 	rootCmd.Flags().StringP(flagHostname.String(), "", "", "hostname (for autotls certs)")
 	rootCmd.Flags().StringP(flagListenAddr.String(), "", "", "address to listen on (:8080 or :443 if autotls is set)")
+	rootCmd.Flags().BoolP(flagDisableOONIRelay.String(), "", false, "disable relay reports to OONI (relay on by default)")
 }
 
 // initConfig reads config file and any relevant ENV variables if set.

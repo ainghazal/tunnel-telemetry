@@ -33,13 +33,13 @@ type ReportRequest struct {
 	TestVersion       string `json:"test_version"`
 }
 
-// TODO: pass the Probe(collector) ASN/CC
+// NewReportRequest returns a new ReportRequest object.
 func NewReportRequest() *ReportRequest {
 	rr := &ReportRequest{
 		DataFormatVersion: "0.2.0",
 		Format:            "json",
-		ProbeASN:          "AS32", // FIXME
-		ProbeCC:           "IT",   // FIXME
+		ProbeASN:          "",
+		ProbeCC:           "",
 		SoftwareName:      reporterSoftwareName,
 		SoftwareVersion:   reporterSoftwareVersion,
 		TestName:          tunnelTelemetryExperimentName,
@@ -176,7 +176,15 @@ func (rs *ReportSubmitter) Close() error {
 func SubmitMeasurement(mm *model.Measurement) error {
 	rs := NewReportSubmitter()
 	rr := NewReportRequest()
+
+	// this will silently fail to submit a working measurement if
+	// probeASN and ProbeCC were not properly set. We should take care
+	// to verify that we're logging the corner cases where we fail to geolocate here.
+	rr.ProbeASN = mm.ClientASN
+	rr.ProbeCC = mm.ClientCC
+
 	rr.TestStartTime = time.Now().UTC().Format(timeFormat)
+
 	data, err := rr.JSON()
 	if err != nil {
 		return err
@@ -185,7 +193,6 @@ func SubmitMeasurement(mm *model.Measurement) error {
 	if err := rs.Start(data); err != nil {
 		return err
 	}
-
 	var runtimeSeconds float64
 	if mm.DurationMS != 0 {
 		runtimeSeconds = float64(mm.DurationMS) / 1e3
