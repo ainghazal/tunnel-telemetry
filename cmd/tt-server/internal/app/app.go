@@ -20,26 +20,35 @@ var (
 	defaultHTTPSAddr  = ":443"
 )
 
-var (
-	flagAllowPublicEndpoint = "allow-public-endpoint"
-	flagAutoTLS             = "autotls"
-	flagAutoTLSCacheDir     = "autotls-cache-dir"
-	flagCollectorID         = "collector-id"
-	flagDebug               = "debug"
-	flagDebugGeolocation    = "debug-geolocation"
-	flagHostname            = "hostname"
-	flagListenAddr          = "listen"
+type flag int
+
+const (
+	flagAllowPublicEndpoint flag = iota
+	flagAutoTLS
+	flagAutoTLSCacheDir
+	flagCollectorID
+	flagDebug
+	flagDebugGeolocation
+	flagHostname
+	flagListenAddr
 )
 
-var allFlags = []string{
-	flagAllowPublicEndpoint,
-	flagAutoTLS,
-	flagAutoTLSCacheDir,
-	flagCollectorID,
-	flagDebug,
-	flagDebugGeolocation,
-	flagHostname,
-	flagListenAddr,
+var allFlags = map[flag]string{
+	flagAllowPublicEndpoint: "allow-public-endpoint",
+	flagAutoTLS:             "autotls",
+	flagAutoTLSCacheDir:     "autotls-cache-dir",
+	flagCollectorID:         "collector-id",
+	flagDebug:               "debug",
+	flagDebugGeolocation:    "debug-geolocation",
+	flagHostname:            "hostname",
+	flagListenAddr:          "listen",
+}
+
+func (f flag) String() string {
+	if name, ok := allFlags[f]; ok {
+		return name
+	}
+	return ""
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -52,14 +61,14 @@ A collector server receives reports from tunnel clients,
 and optionally stores them and/or relays them to an upstream collector.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := &config.Config{
-			AllowPublicEndpoint: viper.GetBool(flagAllowPublicEndpoint),
-			AutoTLS:             viper.GetBool(flagAutoTLS),
-			AutoTLSCacheDir:     viper.GetString(flagAutoTLSCacheDir),
-			CollectorID:         viper.GetString(flagCollectorID),
-			Debug:               viper.GetBool(flagDebug),
-			DebugGeolocation:    viper.GetBool(flagDebugGeolocation),
-			Hostname:            viper.GetString(flagHostname),
-			ListenAddr:          viper.GetString(flagListenAddr),
+			AllowPublicEndpoint: viper.GetBool(flagAllowPublicEndpoint.String()),
+			AutoTLS:             viper.GetBool(flagAutoTLS.String()),
+			AutoTLSCacheDir:     viper.GetString(flagAutoTLSCacheDir.String()),
+			CollectorID:         viper.GetString(flagCollectorID.String()),
+			Debug:               viper.GetBool(flagDebug.String()),
+			DebugGeolocation:    viper.GetBool(flagDebugGeolocation.String()),
+			Hostname:            viper.GetString(flagHostname.String()),
+			ListenAddr:          viper.GetString(flagListenAddr.String()),
 		}
 
 		if cfg.AutoTLS && cfg.Hostname == "" {
@@ -93,14 +102,14 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", defaultConfigFile, "config file")
 
-	rootCmd.Flags().BoolP(flagAllowPublicEndpoint, "", false, "allow publishing of the endpoints IP")
-	rootCmd.Flags().BoolP(flagAutoTLS, "", false, "use autotls to manage LetsEncrypt Certificates (default: false)")
-	rootCmd.Flags().StringP(flagAutoTLSCacheDir, "", defaultCacheDir, "dir to cache autotls material")
-	rootCmd.Flags().StringP(flagCollectorID, "", "", "collector ID to add to enrich reports with")
-	rootCmd.Flags().BoolP(flagDebug, "d", false, "set debug level in logs")
-	rootCmd.Flags().BoolP(flagDebugGeolocation, "", false, "get real IP from headers (potentially insecure!)")
-	rootCmd.Flags().StringP(flagHostname, "", "", "hostname (for autotls certs)")
-	rootCmd.Flags().StringP(flagListenAddr, "", "", "address to listen on (:8080 or :443 if autotls is set)")
+	rootCmd.Flags().BoolP(flagAllowPublicEndpoint.String(), "", false, "allow publishing of the endpoints IP")
+	rootCmd.Flags().BoolP(flagAutoTLS.String(), "", false, "use autotls to manage LetsEncrypt Certificates (default: false)")
+	rootCmd.Flags().StringP(flagAutoTLSCacheDir.String(), "", defaultCacheDir, "dir to cache autotls material")
+	rootCmd.Flags().StringP(flagCollectorID.String(), "", "", "collector ID to add to enrich reports with")
+	rootCmd.Flags().BoolP(flagDebug.String(), "d", false, "set debug level in logs")
+	rootCmd.Flags().BoolP(flagDebugGeolocation.String(), "", false, "get real IP from headers (potentially insecure!)")
+	rootCmd.Flags().StringP(flagHostname.String(), "", "", "hostname (for autotls certs)")
+	rootCmd.Flags().StringP(flagListenAddr.String(), "", "", "address to listen on (:8080 or :443 if autotls is set)")
 }
 
 // initConfig reads config file and any relevant ENV variables if set.

@@ -30,6 +30,9 @@ type Config struct {
 
 	// ListenAddr is the address where the server lsitens.
 	ListenAddr string
+
+	// RelayToOONI will relay reports to OONI if set.
+	RelayToOONI bool
 }
 
 func NewConfig() *Config {
@@ -41,5 +44,6 @@ func NewConfig() *Config {
 		Debug:               false,
 		DebugGeolocation:    false,
 		Hostname:            "",
+		RelayToOONI:         false,
 	}
 }
