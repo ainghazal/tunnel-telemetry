@@ -38,8 +38,8 @@ func NewReportRequest() *ReportRequest {
 	rr := &ReportRequest{
 		DataFormatVersion: "0.2.0",
 		Format:            "json",
-		ProbeASN:          "AS32",
-		ProbeCC:           "IT",
+		ProbeASN:          "AS32", // FIXME
+		ProbeCC:           "IT",   // FIXME
 		SoftwareName:      reporterSoftwareName,
 		SoftwareVersion:   reporterSoftwareVersion,
 		TestName:          tunnelTelemetryExperimentName,
@@ -58,21 +58,32 @@ type reportResponse struct {
 	ReportID       string `json:"report_id"`
 }
 
+type testKeys struct {
+	Endpoint     string  `json:"endpoint,omitempty"`
+	EndpointPort int     `json:"endpoint_port"`
+	EndpointASN  string  `json:"endpoint_asn"`
+	EndpointCC   string  `json:"endpoint_cc"`
+	Protocol     string  `json:"protocol"`
+	Config       any     `json:"config,omitempty"`
+	SamplingRate float32 `json:"sampling_rate"`
+}
+
 type measurementBody struct {
-	MeasurementStartTime string  `json:"measurement_start_time"`
-	ProbeASN             string  `json:"probe_asn"`
-	ProbeCC              string  `json:"probe_cc"`
-	ProbeNetworkName     string  `json:"probe_network_name"`
-	CollectorASN         string  `json:"collector_asn,omitempty"`
-	CollectorCC          string  `json:"collector_cc,omitempty"`
-	ReportID             string  `json:"report_id"`
-	SoftwareName         string  `json:"software_name"`
-	SoftwareVersion      string  `json:"software_version"`
-	TestKeys             any     `json:"test_keys"`
-	TestName             string  `json:"test_name"`
-	TestRuntime          float64 `json:"test_runtime"`
-	TestStartTime        string  `json:"test_start_time"`
-	TestVersion          string  `json:"test_version"`
+	MeasurementStartTime string   `json:"measurement_start_time"`
+	ProbeASN             string   `json:"probe_asn"`
+	ProbeCC              string   `json:"probe_cc"`
+	ProbeNetworkName     string   `json:"probe_network_name"`
+	CollectorID          string   `json:"collector_id,omitempty"`
+	CollectorASN         string   `json:"collector_asn,omitempty"`
+	CollectorCC          string   `json:"collector_cc,omitempty"`
+	ReportID             string   `json:"report_id"`
+	SoftwareName         string   `json:"software_name"`
+	SoftwareVersion      string   `json:"software_version"`
+	TestKeys             testKeys `json:"test_keys"`
+	TestName             string   `json:"test_name"`
+	TestRuntime          float64  `json:"test_runtime"`
+	TestStartTime        string   `json:"test_start_time"`
+	TestVersion          string   `json:"test_version"`
 }
 
 type OONIMeasurement struct {
@@ -180,17 +191,26 @@ func SubmitMeasurement(mm *model.Measurement) error {
 			MeasurementStartTime: mm.TimeStart.UTC().Format(timeFormat),
 			ProbeASN:             mm.ClientASN,
 			ProbeCC:              mm.ClientCC,
-			ProbeNetworkName:     "Unknown ISP",
+			ProbeNetworkName:     "", // TODO: fill it in
 			ReportID:             rs.ReportID,
 			SoftwareName:         reporterSoftwareName,
 			SoftwareVersion:      reporterSoftwareVersion,
-			TestKeys:             mm,
-			TestName:             tunnelTelemetryExperimentName,
-			TestRuntime:          0, // it'd be good to add
-			TestStartTime:        mm.TimeStart.UTC().Format(timeFormat),
-			TestVersion:          tunnelTelemetryExperimentVersion,
+			TestKeys: testKeys{
+				Endpoint:     mm.Endpoint,
+				EndpointPort: mm.EndpointPort,
+				EndpointASN:  mm.EndpointASN,
+				EndpointCC:   mm.EndpointCC,
+				Protocol:     mm.Protocol,
+				Config:       mm.Config,
+				SamplingRate: float32(mm.SamplingRate),
+			},
+			TestName:      tunnelTelemetryExperimentName,
+			TestRuntime:   0, // it'd be good to add
+			TestStartTime: mm.TimeStart.UTC().Format(timeFormat),
+			TestVersion:   tunnelTelemetryExperimentVersion,
 		},
 	}
+
 	mmid, err := rs.SendMeasurement(m)
 	if err != nil {
 		return err
