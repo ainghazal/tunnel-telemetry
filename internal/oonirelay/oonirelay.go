@@ -186,6 +186,11 @@ func SubmitMeasurement(mm *model.Measurement) error {
 		return err
 	}
 
+	var runtimeSeconds float64
+	if mm.DurationMS != 0 {
+		runtimeSeconds = float64(mm.DurationMS) / 1e3
+	}
+
 	m := &OONIMeasurement{
 		Format: "json",
 		Content: measurementBody{
@@ -208,7 +213,7 @@ func SubmitMeasurement(mm *model.Measurement) error {
 				SamplingRate: float32(mm.SamplingRate),
 			},
 			TestName:      tunnelTelemetryExperimentName,
-			TestRuntime:   0, // it'd be good to add
+			TestRuntime:   runtimeSeconds,
 			TestStartTime: mm.TimeStart.UTC().Format(timeFormat),
 			TestVersion:   tunnelTelemetryExperimentVersion,
 		},

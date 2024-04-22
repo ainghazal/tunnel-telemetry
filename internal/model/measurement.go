@@ -34,7 +34,7 @@ type Measurement struct {
 	OOID         string     `json:"ooni-measurement-id,omitempty"`
 	OOIDLink     string     `json:"ooni-measurement-link,omitempty"`
 	TimeStart    *time.Time `json:"time"`
-	DurationMS   int64      `json:"duration,omitempty"`
+	DurationMS   int64      `json:"duration_ms,omitempty"`
 	TimeReported *time.Time `json:"t_reported,omitempty"`
 	TimeRelayed  *time.Time `json:"t_relayed,omitempty"`
 	Agent        string     `json:"agent,omitempty"`
@@ -58,6 +58,7 @@ func NewMeasurement() *Measurement {
 		UUID:         "",
 		OOID:         "",
 		TimeStart:    &time.Time{},
+		DurationMS:   0,
 		Agent:        "",
 		CollectorID:  "",
 		Endpoint:     "",
@@ -90,6 +91,9 @@ func (m *Measurement) Validate() error {
 	}
 	if m.TimeStart.UTC().Before(time.Now().Add(time.Duration(AllowedLimitForOldReportsInDays) * time.Hour * -24)) {
 		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "invalid time, report too old (t)")
+	}
+	if m.DurationMS < 0 {
+		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "duration cannot be negative")
 	}
 	if m.Endpoint == "" {
 		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "endpoint cannot be empty")

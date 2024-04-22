@@ -91,20 +91,35 @@ func parseMeasurementResponse(b []byte) (*model.Measurement, error) {
 }
 
 type reportData struct {
-	Type      string
-	Timestamp string
-	Endpoint  string
-	Failure   *string
+	Type       string
+	Timestamp  string
+	DurationMS int
+	Endpoint   string
+	Failure    *string
 }
 
 func makeReport(rd *reportData) string {
-	reportTmpl := `{
+	var reportTmpl string
+
+	if rd.DurationMS != 0 {
+		reportTmpl = `{
+	"report-type": "{{ .Type }}",
+	"time": "{{ .Timestamp }}",
+	"duration_ms": {{ .DurationMS}},
+	"endpoint": "{{ .Endpoint }}",
+	"config": {"prefix": "xx"},
+	"failure": {{ if .Failure }}{{ .Failure }}{{ else }}null{{ end }}
+}`
+	} else {
+		reportTmpl = `{
 	"report-type": "{{ .Type }}",
 	"time": "{{ .Timestamp }}",
 	"endpoint": "{{ .Endpoint }}",
 	"config": {"prefix": "xx"},
 	"failure": {{ if .Failure }}{{ .Failure }}{{ else }}null{{ end }}
 }`
+	}
+
 	tmpl, _ := template.New("report").Parse(reportTmpl)
 	var report bytes.Buffer
 	if err := tmpl.Execute(&report, rd); err != nil {
@@ -286,5 +301,40 @@ func TestClientGeolocationWithSpoofedHeader(t *testing.T) {
 		assert.Equal(t, m.ClientASN, "AS3215")
 		assert.Equal(t, m.EndpointCC, "AU")
 		assert.Equal(t, m.EndpointASN, "AS13335")
+	}
+}
+
+func TestReportWithDuration(t *testing.T) {
+	report := makeReport(&reportData{
+		Type:       "tunnel-telemetry",
+		Timestamp:  makeTimestampForYesterday(),
+		DurationMS: 2345,
+		Endpoint:   "ss://1.1.1.1:443",
+	})
+
+	ctx, hdlr, rec := testFileSystemCollectorWithPayload(
+		"/report",
+		report,
+		nil,
+		&mockRequest{},
+	)
+	if assert.NoError(t, hdlr.CreateReport(ctx)) {
+		if assert.Equal(t, http.StatusCreated, rec.Code) {
+			m, err := parseMeasurementResponse(rec.Body.Bytes())
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.True(t, isValidUUID(m.UUID))
+			assert.Equal(t, int64(2345), m.DurationMS)
+			assert.Equal(t, "ss", m.Protocol)
+			assert.Equal(t, 443, m.EndpointPort)
+			// by default, we scrub the endpoint field, so we don't expect
+			// the endpoint address to be public either.
+			assert.Equal(t, "", m.EndpointAddr)
+			assert.Equal(t, "", m.Endpoint)
+		} else {
+			t.Error(rec.Body.String())
+
+		}
 	}
 }
