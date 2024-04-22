@@ -25,7 +25,47 @@ go install github.com/ainghazal/tunnel-telemetry/cmd/tt-server@latest
 tt-server
 ```
 
-This will run server in port `:8080`.
+This will run a test `http` server in port `:8080`.
+
+### Autotls
+
+You can enable `autotls` to fetch LetsEncrypt certificates.
+
+```bash
+tt-server --autotls --hostname collector.example.org
+```
+
+### Help
+
+```bash
+tt-server --help
+```
+
+### Config
+
+All the configuration flags can be passed as env variables:
+
+```bash
+AUTOTLS=true HOSTNAME=collector.example.org tt-server
+```
+
+Or as a `yaml` configuration file:
+
+
+```bash
+cat /home/user/ttserver/config.yaml
+autotls: true
+hostname: collector.asdf.network
+```
+
+And then pass that config file to the `tt-server` invocation:
+
+```bash
+tt-server --config /home/user/ttserver/config.yaml
+```
+
+The default configuration location is `/etc/tunneltelemetry/config.yaml`; any flag or environment variable will take precedence over the options set in the config file.
+
 
 ## Sending a report
 
