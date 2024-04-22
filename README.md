@@ -85,10 +85,18 @@ A minimal report is a json containing only three mandatory fields:
 * `endpoint`: **MUST** be the endpoint that the client attempted to connect to, in the format `protocol://ip_address:port`.
 
 ```bash
-curl -X POST \
+$ cat report.json
+{
+  "report-type": "tunnel-telemetry",
+  "time": "2024-04-12T00:00:00Z",
+  "endpoint": "ss://1.1.1.1:443",
+  "config": {"prefix": "xx"}
+}
+
+$ curl -X POST \
     -H 'Content-Type: application/json' \
     -H 'X-Forwarded-For: 2.3.4.5' \
-    -d '{"report-type": "tunnel-telemetry", "t": "2024-04-12T00:00:00Z", "endpoint": "ss://1.1.1.1:443", "config": {"prefix": "asdf"}}' \
+    -d @report.json \
     http://localhost:8080/report
 ```
 
