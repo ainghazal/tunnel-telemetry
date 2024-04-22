@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"fmt"
+
 	"github.com/ainghazal/tunnel-telemetry/internal/config"
 	"github.com/ainghazal/tunnel-telemetry/internal/model"
 	"github.com/ainghazal/tunnel-telemetry/internal/oonirelay"
@@ -19,14 +21,14 @@ func NewFileSystemCollector(cfg *config.Config) *FileSystemCollector {
 }
 
 func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error {
-	if m.ClientASN != 0 && m.ClientCC != "" {
+	if m.ClientASN != "" && m.ClientCC != "" {
 		// the client already filled ASN and CC, so we don't attempt to override it.
 		return nil
 	}
 
 	asnLookup := mmdbLookupper{}
 	if asn, _, err := asnLookup.LookupASN(ip); err == nil {
-		m.ClientASN = asn
+		m.ClientASN = fmt.Sprintf("AS%d", asn)
 	}
 	if cc, err := asnLookup.LookupCC(ip); err == nil {
 		m.ClientCC = cc
@@ -48,7 +50,7 @@ func (fsc *FileSystemCollector) Geolocate(m *model.Measurement, ip string) error
 			m.EndpointAddr = endpoint.Host
 		}
 		if asn, _, err := asnLookup.LookupASN(endpoint.Host); err == nil {
-			m.EndpointASN = asn
+			m.EndpointASN = fmt.Sprintf("AS%d", asn)
 		}
 		if cc, err := asnLookup.LookupCC(endpoint.Host); err == nil {
 			m.EndpointCC = cc

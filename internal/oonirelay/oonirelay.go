@@ -63,10 +63,12 @@ type measurementBody struct {
 	ProbeASN             string  `json:"probe_asn"`
 	ProbeCC              string  `json:"probe_cc"`
 	ProbeNetworkName     string  `json:"probe_network_name"`
+	CollectorASN         string  `json:"collector_asn,omitempty"`
+	CollectorCC          string  `json:"collector_cc,omitempty"`
 	ReportID             string  `json:"report_id"`
 	SoftwareName         string  `json:"software_name"`
 	SoftwareVersion      string  `json:"software_version"`
-	TelemetryReport      any     `json:"telemetry_report"`
+	TestKeys             any     `json:"test_keys"`
 	TestName             string  `json:"test_name"`
 	TestRuntime          float64 `json:"test_runtime"`
 	TestStartTime        string  `json:"test_start_time"`
@@ -175,17 +177,17 @@ func SubmitMeasurement(mm *model.Measurement) error {
 	m := &OONIMeasurement{
 		Format: "json",
 		Content: measurementBody{
-			MeasurementStartTime: mm.Time.UTC().Format(timeFormat),
-			ProbeASN:             "AS32",
-			ProbeCC:              "IT",
+			MeasurementStartTime: mm.TimeStart.UTC().Format(timeFormat),
+			ProbeASN:             mm.ClientASN,
+			ProbeCC:              mm.ClientCC,
 			ProbeNetworkName:     "Unknown ISP",
 			ReportID:             rs.ReportID,
 			SoftwareName:         reporterSoftwareName,
 			SoftwareVersion:      reporterSoftwareVersion,
-			TelemetryReport:      mm,
+			TestKeys:             mm,
 			TestName:             tunnelTelemetryExperimentName,
 			TestRuntime:          0, // it'd be good to add
-			TestStartTime:        mm.Time.UTC().Format(timeFormat),
+			TestStartTime:        mm.TimeStart.UTC().Format(timeFormat),
 			TestVersion:          tunnelTelemetryExperimentVersion,
 		},
 	}

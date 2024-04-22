@@ -100,7 +100,7 @@ type reportData struct {
 func makeReport(rd *reportData) string {
 	reportTmpl := `{
 	"report-type": "{{ .Type }}",
-	"t": "{{ .Timestamp }}",
+	"time": "{{ .Timestamp }}",
 	"endpoint": "{{ .Endpoint }}",
 	"config": {"prefix": "xx"},
 	"failure": {{ if .Failure }}{{ .Failure }}{{ else }}null{{ end }}
@@ -283,8 +283,8 @@ func TestClientGeolocationWithSpoofedHeader(t *testing.T) {
 			t.Fatal(err)
 		}
 		assert.Equal(t, m.ClientCC, "FR")
-		assert.Equal(t, m.ClientASN, uint(3215))
+		assert.Equal(t, m.ClientASN, "AS3215")
 		assert.Equal(t, m.EndpointCC, "AU")
-		assert.Equal(t, m.EndpointASN, uint(13335))
+		assert.Equal(t, m.EndpointASN, "AS13335")
 	}
 }

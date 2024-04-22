@@ -33,18 +33,19 @@ type Measurement struct {
 	UUID         string     `json:"uuid,omitempty"`
 	OOID         string     `json:"ooni-measurement-id,omitempty"`
 	OOIDLink     string     `json:"ooni-measurement-link,omitempty"`
-	Time         *time.Time `json:"t"`
+	TimeStart    *time.Time `json:"time"`
+	DurationMS   int64      `json:"duration,omitempty"`
 	TimeReported *time.Time `json:"t_reported,omitempty"`
 	TimeRelayed  *time.Time `json:"t_relayed,omitempty"`
 	Agent        string     `json:"agent,omitempty"`
 	Endpoint     string     `json:"endpoint,omitempty"`
 	EndpointAddr string     `json:"endpoint_addr,omitempty"`
 	EndpointPort int        `json:"endpoint_port,omitempty"`
-	EndpointASN  uint       `json:"endpoint_asn,omitempty"`
+	EndpointASN  string     `json:"endpoint_asn,omitempty"`
 	EndpointCC   string     `json:"endpoint_cc,omitempty"`
 	Protocol     string     `json:"proto,omitempty"`
 	Config       any        `json:"config,omitempty"`
-	ClientASN    uint       `json:"client_asn"`
+	ClientASN    string     `json:"client_asn"`
 	ClientCC     string     `json:"client_cc"`
 	Failure      *Failure   `json:"failure,omitempty"`
 	SamplingRate float32    `json:"sampling_rate"`
@@ -55,15 +56,15 @@ func NewMeasurement() *Measurement {
 		Type:         "",
 		UUID:         "",
 		OOID:         "",
-		Time:         &time.Time{},
+		TimeStart:    &time.Time{},
 		Agent:        "",
 		Endpoint:     "",
 		EndpointAddr: "",
 		EndpointPort: 0,
-		EndpointASN:  0,
+		EndpointASN:  "",
 		Protocol:     "",
 		Config:       nil,
-		ClientASN:    0,
+		ClientASN:    "",
 		ClientCC:     "",
 		Failure:      nil,
 		SamplingRate: 1.0,
@@ -79,13 +80,13 @@ func (m *Measurement) Validate() error {
 	if m.Type != "tunnel-telemetry" {
 		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "type should be 'tunnel-telemetry'")
 	}
-	if m.Time == nil {
+	if m.TimeStart == nil {
 		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "measurement must send time (t)")
 	}
-	if m.Time.UTC().After(time.Now().Add(time.Duration(AllowedClockSkewSeconds) * time.Second)) {
+	if m.TimeStart.UTC().After(time.Now().Add(time.Duration(AllowedClockSkewSeconds) * time.Second)) {
 		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "illegal time in the future (t)")
 	}
-	if m.Time.UTC().Before(time.Now().Add(time.Duration(AllowedLimitForOldReportsInDays) * time.Hour * -24)) {
+	if m.TimeStart.UTC().Before(time.Now().Add(time.Duration(AllowedLimitForOldReportsInDays) * time.Hour * -24)) {
 		return fmt.Errorf("%w: %s", ErrInvalidMeasurement, "invalid time, report too old (t)")
 	}
 	if m.Endpoint == "" {
