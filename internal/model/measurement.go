@@ -38,6 +38,7 @@ type Measurement struct {
 	TimeReported *time.Time `json:"t_reported,omitempty"`
 	TimeRelayed  *time.Time `json:"t_relayed,omitempty"`
 	Agent        string     `json:"agent,omitempty"`
+	CollectorID  string     `json:"collector_id,omitempty"`
 	Endpoint     string     `json:"endpoint,omitempty"`
 	EndpointAddr string     `json:"endpoint_addr,omitempty"`
 	EndpointPort int        `json:"endpoint_port,omitempty"`
@@ -58,6 +59,7 @@ func NewMeasurement() *Measurement {
 		OOID:         "",
 		TimeStart:    &time.Time{},
 		Agent:        "",
+		CollectorID:  "",
 		Endpoint:     "",
 		EndpointAddr: "",
 		EndpointPort: 0,
@@ -105,6 +107,9 @@ func (m *Measurement) PreSave(cfg *config.Config) error {
 	if !cfg.AllowPublicEndpoint {
 		// scrub the endpoint IP Address.
 		m.Endpoint = ""
+	}
+	if cfg.CollectorID != "" {
+		m.CollectorID = cfg.CollectorID
 	}
 	return nil
 }

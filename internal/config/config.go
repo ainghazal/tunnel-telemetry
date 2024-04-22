@@ -15,6 +15,9 @@ type Config struct {
 	// AutoTLSCache is the dir to cache LE TLS material.
 	AutoTLSCacheDir string
 
+	// CollectorID is an optional ID to enrich the measurements with.
+	CollectorID string
+
 	// Debug sets the debug level in the logs.
 	Debug bool
 
@@ -34,6 +37,8 @@ func NewConfig() *Config {
 		AllowPublicEndpoint: false,
 		AutoTLS:             false,
 		AutoTLSCacheDir:     "",
+		CollectorID:         "",
+		Debug:               false,
 		DebugGeolocation:    false,
 		Hostname:            "",
 	}

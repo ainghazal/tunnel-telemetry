@@ -24,6 +24,7 @@ var (
 	flagAllowPublicEndpoint = "allow-public-endpoint"
 	flagAutoTLS             = "autotls"
 	flagAutoTLSCacheDir     = "autotls-cache-dir"
+	flagCollectorID         = "collector-id"
 	flagDebug               = "debug"
 	flagDebugGeolocation    = "debug-geolocation"
 	flagHostname            = "hostname"
@@ -34,6 +35,7 @@ var allFlags = []string{
 	flagAllowPublicEndpoint,
 	flagAutoTLS,
 	flagAutoTLSCacheDir,
+	flagCollectorID,
 	flagDebug,
 	flagDebugGeolocation,
 	flagHostname,
@@ -53,6 +55,7 @@ and optionally stores them and/or relays them to an upstream collector.`,
 			AllowPublicEndpoint: viper.GetBool(flagAllowPublicEndpoint),
 			AutoTLS:             viper.GetBool(flagAutoTLS),
 			AutoTLSCacheDir:     viper.GetString(flagAutoTLSCacheDir),
+			CollectorID:         viper.GetString(flagCollectorID),
 			Debug:               viper.GetBool(flagDebug),
 			DebugGeolocation:    viper.GetBool(flagDebugGeolocation),
 			Hostname:            viper.GetString(flagHostname),
@@ -93,6 +96,7 @@ func init() {
 	rootCmd.Flags().BoolP(flagAllowPublicEndpoint, "", false, "allow publishing of the endpoints IP")
 	rootCmd.Flags().BoolP(flagAutoTLS, "", false, "use autotls to manage LetsEncrypt Certificates (default: false)")
 	rootCmd.Flags().StringP(flagAutoTLSCacheDir, "", defaultCacheDir, "dir to cache autotls material")
+	rootCmd.Flags().StringP(flagCollectorID, "", "", "collector ID to add to enrich reports with")
 	rootCmd.Flags().BoolP(flagDebug, "d", false, "set debug level in logs")
 	rootCmd.Flags().BoolP(flagDebugGeolocation, "", false, "get real IP from headers (potentially insecure!)")
 	rootCmd.Flags().StringP(flagHostname, "", "", "hostname (for autotls certs)")

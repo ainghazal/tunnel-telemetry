@@ -73,12 +73,13 @@ type measurementBody struct {
 	ProbeASN             string   `json:"probe_asn"`
 	ProbeCC              string   `json:"probe_cc"`
 	ProbeNetworkName     string   `json:"probe_network_name"`
+	SoftwareName         string   `json:"software_name"`
+	SoftwareVersion      string   `json:"software_version"`
 	CollectorID          string   `json:"collector_id,omitempty"`
 	CollectorASN         string   `json:"collector_asn,omitempty"`
 	CollectorCC          string   `json:"collector_cc,omitempty"`
 	ReportID             string   `json:"report_id"`
-	SoftwareName         string   `json:"software_name"`
-	SoftwareVersion      string   `json:"software_version"`
+	ReportUUID           string   `json:"report_uuid,omitempty"`
 	TestKeys             testKeys `json:"test_keys"`
 	TestName             string   `json:"test_name"`
 	TestRuntime          float64  `json:"test_runtime"`
@@ -189,10 +190,12 @@ func SubmitMeasurement(mm *model.Measurement) error {
 		Format: "json",
 		Content: measurementBody{
 			MeasurementStartTime: mm.TimeStart.UTC().Format(timeFormat),
+			ReportID:             rs.ReportID,
+			ReportUUID:           mm.UUID,
 			ProbeASN:             mm.ClientASN,
 			ProbeCC:              mm.ClientCC,
 			ProbeNetworkName:     "", // TODO: fill it in
-			ReportID:             rs.ReportID,
+			CollectorID:          mm.CollectorID,
 			SoftwareName:         reporterSoftwareName,
 			SoftwareVersion:      reporterSoftwareVersion,
 			TestKeys: testKeys{

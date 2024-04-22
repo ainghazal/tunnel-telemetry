@@ -67,6 +67,15 @@ tt-server --config /home/user/ttserver/config.yaml
 The default configuration location is `/etc/tunneltelemetry/config.yaml`; any flag or environment variable will take precedence over the options set in the config file.
 
 
+### Server configuration 
+
+* `autotls`: if true, it will configure LetsEncrypt certificates.
+* `autotls-cache-dir`: a dir to cache autotls material (default: "/var/www/.cache").
+* `collector-id`: if present, this unique identifier will be added to all reports as an extra annotation. This can be useful to later on query all reports submitted by a given collector.
+* `hostname`: the hostname to configure `autotls` certs.
+* `listen`: the address to listen on (`:8080` by default; `443` if autotls is used).
+
+
 ## Sending a report
 
 A minimal report is a json containing only three mandatory fields:
@@ -83,7 +92,7 @@ curl -X POST \
     http://localhost:8080/report
 ```
 
-### Optional fields
+### Optional report fields
 
 A few optional fields are also understood:
 
