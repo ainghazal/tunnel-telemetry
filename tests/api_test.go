@@ -99,10 +99,10 @@ type reportData struct {
 }
 
 func makeReport(rd *reportData) string {
-	var reportTmpl string
+	var reportTemplate string
 
 	if rd.DurationMS != 0 {
-		reportTmpl = `{
+		reportTemplate = `{
 	"report-type": "{{ .Type }}",
 	"time": "{{ .Timestamp }}",
 	"duration_ms": {{ .DurationMS}},
@@ -111,7 +111,7 @@ func makeReport(rd *reportData) string {
 	"failure": {{ if .Failure }}{{ .Failure }}{{ else }}null{{ end }}
 }`
 	} else {
-		reportTmpl = `{
+		reportTemplate = `{
 	"report-type": "{{ .Type }}",
 	"time": "{{ .Timestamp }}",
 	"endpoint": "{{ .Endpoint }}",
@@ -120,7 +120,7 @@ func makeReport(rd *reportData) string {
 }`
 	}
 
-	tmpl, _ := template.New("report").Parse(reportTmpl)
+	tmpl, _ := template.New("report").Parse(reportTemplate)
 	var report bytes.Buffer
 	if err := tmpl.Execute(&report, rd); err != nil {
 		panic(err)
